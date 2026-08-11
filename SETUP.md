@@ -151,10 +151,10 @@ Nutzer-Test mit Spotify nach der Panel-Installation deckte auf: Checkboxen funkt
 
 ## Git-Auth
 
-- Auth-Methode: **SSH-Key** (empfohlen statt HTTPS-Token).
-- Auf dem Mac mini erzeugt: `~/.ssh/id_ed25519` (ed25519-Keypair, Kommentar `yeet.nanimo@gmail.com`).
-- Öffentlicher Schlüssel wurde bereits unter GitLab → Access → SSH Keys hinterlegt.
-- Verbindungstest (`ssh -T git@192.168.20.2`) ggf. mit abweichendem Port nötig, falls GitLab SSH nicht auf Standardport 22 läuft — exakte Clone-URL inkl. Port steht auf der Projektseite unter „Clone".
+- **Tatsächlich funktionierender Weg (vom Laptop aus verifiziert): HTTP + Personal Access Token**, nicht SSH. GitLab läuft in einem Docker-Container auf einem NAS (`skynas.intra.skyhomes.de`, reverse-DNS von `192.168.20.2`); die vom „Clone"-Button gezeigte SSH-URL nennt einen intern nicht auflösbaren Docker-Container-Hostnamen (`ec10eb8470a5`), und Port 22 auf der echten IP gehört zum NAS-eigenen System-SSH, nicht zu GitLabs internem `gitlab-shell` — ein `git push` über SSH landete deshalb beim falschen SSH-Dienst und fragte nach einem (nicht existierenden) Passwort. Port-Scan (`nmap`) der üblichen alternativen GitLab-SSH-Ports (2222, 8022, 8443, 10022) fand keinen offenen Port - der korrekte gemappte Port ist nirgends von außen ersichtlich, sondern nur über die NAS-eigene Docker/Container-Manager-Oberfläche einsehbar.
+- **Funktionierende Remote-URL:** `http://192.168.20.2:8088/nani_mo/plasma-multi-bt-audio.git` (die bekannte, im Browser genutzte Adresse - nicht die vom „Clone"-Button vorgeschlagene interne Hostname-Variante).
+- **Auth:** GitLab-Benutzername (`nani_mo`) als Username, ein **Personal Access Token** (User Settings → Access Tokens → „Legacy token", Scope `write_repository`) als Passwort. Vom Laptop aus erzeugt und erfolgreich gepusht (initialer Commit, Branch `main`).
+- Ein separater `~/.ssh/id_ed25519`-Key wurde auf dem Laptop zwar erzeugt (für den ursprünglich geplanten SSH-Weg), wird aber für den Git-Zugriff aktuell nicht genutzt.
 
 ## Workflow-Entscheidungen
 
@@ -169,5 +169,5 @@ Nutzer-Test mit Spotify nach der Panel-Installation deckte auf: Checkboxen funkt
 
 - [x] Hostname/IP des CachyOS-Laptops im LAN mitgeteilt.
 - [x] SSH-Zugriff vom Mac mini auf den CachyOS-Laptop eingerichtet (Public-Key-Auth), für direktes Remote-Bauen/Testen durch den Assistenten.
-- [ ] Exakte SSH-Clone-URL (inkl. Port, falls abweichend von 22) für `plasma-multi-bt-audio` bestätigen.
+- [x] Exakte Clone-URL bestätigt — SSH-Port ließ sich nicht ermitteln, stattdessen HTTP + Personal Access Token als funktionierender Weg etabliert (siehe „Git-Auth" oben). Repo ist auf dem GitLab-Server gepusht (Branch `main`).
 - [x] Build-Abhängigkeiten auf dem Laptop verifiziert und fehlende installiert (siehe „Build-Historie auf dem Testsystem" oben).

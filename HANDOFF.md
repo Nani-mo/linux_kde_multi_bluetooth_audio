@@ -39,5 +39,5 @@ Große Teile von SETUP.md (tmux-Session-Handling, sudo-Passwort-Timing, `qdbus6`
 ## Workflow-Hinweise vom Nutzer (weiterhin gültig)
 
 - Der Nutzer führt Git-Kommandos (`init`, `add`, `commit`, `push`, …) **selbst** aus, um Git zu lernen — nicht proaktiv für ihn übernehmen.
-- Repo ist noch nicht auf dem GitLab-Server gepusht (`http://192.168.20.2:8088/nani_mo/plasma-multi-bt-audio`, siehe SETUP.md „Git-Server"/„Git-Auth"). `PKGBUILD` baut aktuell aus dem lokalen Arbeitsverzeichnis, nicht von dort.
+- **Repo ist auf dem GitLab-Server gepusht** (Branch `main`, Remote `http://192.168.20.2:8088/nani_mo/plasma-multi-bt-audio.git`, Auth per Personal Access Token statt SSH — siehe SETUP.md „Git-Auth" für die Begründung). `PKGBUILD` baut weiterhin aus dem lokalen Arbeitsverzeichnis, nicht von der Git-Quelle.
 - `.claude/` ist gitignored und lokal an die jeweilige Session/Maschine gebunden — nicht Teil des Projekts.
