@@ -18,6 +18,9 @@ private Q_SLOTS:
     void updatesRowOnSinkChanged();
     void ignoresDuplicateSinkAdded();
     void setDataUpdatesActiveRole();
+    void toolEnabledGatesActiveCount();
+    void toolEnabledIsInvokableFromQml();
+    void masterVolumeIsInvokableFromQmlAndClamped();
 };
 
 void TestDeviceListModel::addsRowOnSinkAdded()
@@ -114,6 +117,72 @@ void TestDeviceListModel::setDataUpdatesActiveRole()
 
     QVERIFY(model.setData(idx, 0.5, DeviceListModel::VolumeRole));
     QCOMPARE(model.data(idx, DeviceListModel::VolumeRole).toDouble(), 0.5);
+}
+
+void TestDeviceListModel::toolEnabledGatesActiveCount()
+{
+    // Der zentrale Ein/Aus-Schalter (PLAN.md Phase 7.2) soll die Kombi-
+    // Ausgabe pausieren, ohne die Geräteauswahl zu verwerfen - activeCount
+    // (treibt u.a. das Tray-Icon-Badge) muss daher bei toolEnabled=false auf
+    // 0 fallen, obwohl das Gerät weiterhin als "active" markiert bleibt.
+    PipeWireController controller;
+    DeviceListModel model;
+    model.setController(&controller);
+
+    QVERIFY(model.toolEnabled());
+
+    PipeWireController::SinkInfo sink;
+    sink.id = 3;
+    controller.sinkAdded(sink);
+
+    QVERIFY(model.setActive(0, true));
+    QCOMPARE(model.activeCount(), 1);
+
+    QSignalSpy toolEnabledSpy(&model, &DeviceListModel::toolEnabledChanged);
+    model.setToolEnabled(false);
+    QVERIFY(!model.toolEnabled());
+    QCOMPARE(toolEnabledSpy.count(), 1);
+    QCOMPARE(model.activeCount(), 0);
+    QCOMPARE(model.data(model.index(0, 0), DeviceListModel::ActiveRole).toBool(), true);
+
+    model.setToolEnabled(true);
+    QCOMPARE(model.activeCount(), 1);
+}
+
+void TestDeviceListModel::toolEnabledIsInvokableFromQml()
+{
+    // Regressionstest für einen echten, per Nutzer-Live-Test gefundenen Bug
+    // (siehe SETUP.md): setToolEnabled() diente zunächst nur als
+    // Q_PROPERTY-WRITE-Methode ohne Q_INVOKABLE - ein direkter C++-Aufruf
+    // (wie in toolEnabledGatesActiveCount oben) hätte das nie aufgedeckt,
+    // weil er den Meta-Objekt-Aufrufpfad umgeht, über den main.qmls
+    // "deviceModel.setToolEnabled(checked)" tatsächlich läuft.
+    // QMetaObject::invokeMethod-nach-Name simuliert genau diesen Pfad.
+    DeviceListModel model;
+    QVERIFY(model.toolEnabled());
+
+    QVERIFY(QMetaObject::invokeMethod(&model, "setToolEnabled", Q_ARG(bool, false)));
+    QVERIFY(!model.toolEnabled());
+}
+
+void TestDeviceListModel::masterVolumeIsInvokableFromQmlAndClamped()
+{
+    // Gleiche Lektion wie bei toolEnabledIsInvokableFromQml oben angewendet:
+    // Aufruf über QMetaObject::invokeMethod-nach-Name statt Direktaufruf,
+    // damit ein fehlendes Q_INVOKABLE hier von Anfang an auffallen würde.
+    DeviceListModel model;
+    QCOMPARE(model.masterVolume(), 1.0);
+
+    QSignalSpy volumeSpy(&model, &DeviceListModel::masterVolumeChanged);
+    QVERIFY(QMetaObject::invokeMethod(&model, "setMasterVolume", Q_ARG(qreal, 0.4)));
+    QCOMPARE(model.masterVolume(), 0.4);
+    QCOMPARE(volumeSpy.count(), 1);
+
+    // Werte außerhalb 0..1 werden geklemmt, nicht einfach übernommen.
+    model.setMasterVolume(2.0);
+    QCOMPARE(model.masterVolume(), 1.0);
+    model.setMasterVolume(-0.5);
+    QCOMPARE(model.masterVolume(), 0.0);
 }
 
 QTEST_GUILESS_MAIN(TestDeviceListModel)

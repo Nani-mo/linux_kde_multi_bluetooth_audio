@@ -7,13 +7,13 @@
             }
         ],
         "Category": "System Information",
-        "Description": "Simultaneous audio output over multiple connected Bluetooth devices",
-        "Description[de]": "Simultane Audio-Ausgabe über mehrere verbundene Bluetooth-Geräte",
-        "Icon": "audio-speakers-symbolic",
+        "Description": "Simultaneous audio output over multiple connected audio devices",
+        "Description[de]": "Simultane Audio-Ausgabe über mehrere verbundene Audiogeräte",
+        "Icon": "multiaudiooutput-symbolic",
         "Id": "com.nanimo.multibtaudio",
         "License": "GPL-3.0-or-later",
-        "Name": "Multi-BT-Audio",
-        "Name[de]": "Multi-BT-Audio",
+        "Name": "Multi-Audio-Output",
+        "Name[de]": "Multi-Audio-Output",
         "Version": "0.1.0",
         "Website": "http://192.168.20.2:8088/nani_mo/plasma-multi-bt-audio"
     },

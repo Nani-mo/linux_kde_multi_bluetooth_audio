@@ -95,3 +95,14 @@ endif()
 install(DIRECTORY plasmoid/
     DESTINATION ${KDE_INSTALL_DATADIR}/plasma/plasmoids/com.nanimo.multibtaudio
 )
+
+# Eigenes Tray-Icon (PLAN.md Phase 7.2 "Besseres Icon für den Systemtray"):
+# wird per Namen referenziert (metadata.json KPlugin.Icon,
+# CompactRepresentation.qml), muss dafür wie jedes andere Systemicon in
+# einem XDG-Icon-Theme-Verzeichnis liegen, nicht im Plasmoid-Package selbst
+# - Konvention und Zielverzeichnisse (hicolor/scalable/status/...) siehe
+# andere installierte Plasmoids (org.kde.plasma.folder, kdeconnect).
+include(ECMInstallIcons)
+ecm_install_icons(ICONS icons/sc-status-multiaudiooutput-symbolic.svg
+    DESTINATION ${KDE_INSTALL_ICONDIR}
+)

@@ -19,8 +19,12 @@ install_manifest.txt
 .qmake.stash
 
 # makepkg (Arch-Paketbau)
+# ACHTUNG: hier stand früher zusätzlich "src/" - das schloss versehentlich
+# auch das echte C++-Quellcode-Verzeichnis (src/*.cpp) aus, da makepkg bei
+# leerem source=() denselben Namen für sein eigenes srcdir verwendet.
+# PKGBUILD baut deshalb jetzt bewusst nach $startdir/build statt $srcdir/build
+# (siehe Kommentar dort) - "src/" braucht hier also gar nicht mehr zu stehen.
 pkg/
-src/
 *.pkg.tar.*
 
 # Editoren / IDEs

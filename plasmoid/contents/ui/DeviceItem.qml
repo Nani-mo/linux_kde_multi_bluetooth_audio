@@ -9,16 +9,42 @@ ColumnLayout {
     id: deviceItem
 
     property string deviceName: ""
-    property string deviceIcon: "audio-headset-symbolic"
+    property string formFactor: ""
+    property string btAddress: ""
     property string codec: ""
     property bool active: false
     property real volume: 1.0
     property int delayMs: 0
 
-    // Der Delay-Wert wird aktuell nur im Datenmodell gespeichert - ein
-    // direkter Property-Ansatz (SPA_PROP_latencyOffsetNsec) hatte im
-    // Hörtest keine Wirkung; eine tatsächliche Latenz-Kompensation im
-    // Audiopfad ist noch offen (siehe PLAN.md Abschnitt 4, SETUP.md).
+    // Icon je nach Geräteart. device.form-factor wird auf dem Testsystem
+    // aktuell für kein einziges Gerät (auch nicht Bluetooth) gesetzt - mit
+    // echtem pw-dump verifiziert, siehe SETUP.md - daher primär anhand
+    // btAddress unterscheiden (Bluetooth vs. nicht) und formFactor nur als
+    // Verfeinerung nutzen, falls eine Distribution/ein Gerät ihn doch
+    // liefert.
+    readonly property string deviceIcon: {
+        switch (formFactor) {
+        case "headset":
+        case "headphone":
+            return "audio-headset-symbolic";
+        case "speaker":
+        case "hifi":
+        case "car":
+            return "audio-speakers-symbolic";
+        case "handset":
+        case "phone":
+            return "phone-symbolic";
+        case "portable":
+            return "multimedia-player-symbolic";
+        }
+        return btAddress.length > 0 ? "audio-headset-symbolic" : "audio-card-symbolic";
+    }
+
+    // Der Delay-Wert wird über CombineSinkManager per module-loopback
+    // (target.delay.sec) tatsächlich im Audiopfad wirksam (siehe PLAN.md
+    // Phase 7.1, SETUP.md „Delay-Ergebnis Teil 2"). Der zuvor verworfene
+    // direkte Property-Ansatz (SPA_PROP_latencyOffsetNsec) hatte im
+    // Hörtest keine Wirkung.
     signal activeToggled(bool checked)
     signal volumeEdited(real value)
     signal delayEdited(int value)
@@ -59,11 +85,31 @@ ColumnLayout {
         }
 
         QQC2.Slider {
+            id: volumeSlider
             from: 0.0
             to: 1.0
             value: deviceItem.volume
-            Layout.preferredWidth: Kirigami.Units.gridUnit * 6
-            onMoved: deviceItem.volumeEdited(value)
+            Layout.preferredWidth: Kirigami.Units.gridUnit * 10
+
+            // Ein reiner Debounce (Timer bei jeder Bewegung neu gestartet,
+            // feuert erst nach einer Ruhephase) fühlte sich bei kleinen
+            // Bewegungen wie "reagiert nicht" an - jede neue Mausbewegung
+            // schiebt den Timer immer weiter auf, bevor er auslösen kann.
+            // Jetzt stattdessen ein Throttle: Während des Ziehens (pressed)
+            // wird alle 60ms der aktuelle Wert angewendet, das bleibt spürbar
+            // "live", begrenzt aber trotzdem die wpctl-Aufrufe (statt einem
+            // pro Drag-Tick). Beim Loslassen wird der finale Wert zusätzlich
+            // sofort angewendet, ohne auf den nächsten Tick zu warten.
+            onPressedChanged: if (!pressed) {
+                deviceItem.volumeEdited(value);
+            }
+
+            Timer {
+                interval: 60
+                repeat: true
+                running: volumeSlider.pressed
+                onTriggered: deviceItem.volumeEdited(volumeSlider.value)
+            }
         }
 
         QQC2.ToolButton {
@@ -87,11 +133,25 @@ ColumnLayout {
             text: i18n("Delay-Offset:")
         }
         QQC2.SpinBox {
+            id: delaySpinBox
             from: 0
-            to: 500
+            to: 2000
             stepSize: 5
             value: deviceItem.delayMs
-            onValueModified: deviceItem.delayEdited(value)
+
+            // Debounce wie beim Lautstärke-Regler, hier sogar wichtiger:
+            // jede Delay-Änderung löst ein vollständiges Neuladen von
+            // combine-stream aus (siehe CombineSinkManager::setActiveTargets),
+            // was kurz *alle* aktiven Geräte unterbricht, nicht nur dieses.
+            // Ohne Debounce würde Halten der Auf/Ab-Buttons (Auto-Repeat)
+            // eine Reload-Kaskade auslösen.
+            onValueModified: delayDebounce.restart()
+
+            Timer {
+                id: delayDebounce
+                interval: 150
+                onTriggered: deviceItem.delayEdited(delaySpinBox.value)
+            }
         }
         QQC2.Label {
             text: i18n("ms")

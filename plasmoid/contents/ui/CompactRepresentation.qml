@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
 import org.kde.kirigami as Kirigami
 
@@ -20,17 +19,21 @@ MouseArea {
     required property PlasmoidItem plasmoidItem
     property int activeCount: 0
 
-    hoverEnabled: true
-
-    QQC2.ToolTip.visible: containsMouse
-    QQC2.ToolTip.text: compactRoot.activeCount === 0
-        ? i18n("Keine Bluetooth-Audiogeräte aktiv")
-        : i18np("%1 Gerät aktiv", "%1 Geräte aktiv", compactRoot.activeCount)
+    // Kein Hover-Tooltip: er tauchte sofort beim Hovern auf und lag dabei
+    // über dem Icon, was das eigentliche Öffnen des Popups per Klick
+    // erschwerte (Nutzer-Feedback) - der Badge-Zähler unten liefert die
+    // gleiche Information rein visuell, ohne den Klickpfad zu stören.
 
     Kirigami.Icon {
         id: icon
         anchors.fill: parent
-        source: compactRoot.activeCount > 0 ? "audio-speakers-symbolic" : "audio-volume-muted-symbolic"
+        // Eigenes Icon (zwei Lautsprecher nebeneinander statt generischem
+        // Einzel-Lautsprecher) im "aktiv"-Zustand, damit sich das Tray-Icon
+        // von anderen Audio-Widgets unterscheidet (Nutzerwunsch, PLAN.md
+        // Phase 7.2). Für "aus" bewusst beim Standard-Mute-Icon geblieben -
+        // das Konzept "stummgeschaltet" ist bereits universell klar und
+        // braucht keine eigene Bildsprache.
+        source: compactRoot.activeCount > 0 ? "multiaudiooutput-symbolic" : "audio-volume-muted-symbolic"
     }
 
     Rectangle {
