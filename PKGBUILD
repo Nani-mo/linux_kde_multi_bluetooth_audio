@@ -6,7 +6,7 @@
 # GitLab-Server gepusht ist (siehe SETUP.md).
 pkgname=plasma-multi-bt-audio
 pkgver=0.1.0
-pkgrel=23
+pkgrel=25
 pkgdesc="KDE-Plasma-Systemtray-Applet zur simultanen Audioausgabe über mehrere Bluetooth-Geräte"
 arch=('x86_64')
 url="http://192.168.20.2:8088/nani_mo/plasma-multi-bt-audio"

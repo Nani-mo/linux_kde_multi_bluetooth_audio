@@ -211,6 +211,8 @@ Reihenfolge bewusst gewählt: erst Lags/Bugs beheben (7.1), danach UI-Upgrades (
 
 **Nicht reproduzierbarer Einzelfall (im Auge behalten, nicht aktiv verfolgen):** Ein einziges Mal fiel nach Aus-/Wiedereinschalten des zentralen Schalters ein Gerät aus der Kombi-Ausgabe heraus. Zwei gezielte Nachtests mit Diagnose-Logging zeigten beide Geräte jedes Mal korrekt wiederhergestellt - siehe SETUP.md „Re-Enable-Bug" für das Logging-Muster, falls es erneut auftritt.
 
+**Ebenfalls nicht reproduzierbar (im Auge behalten, nicht aktiv verfolgen):** Meldung, ein einmal korrekt eingestellter Delay-Wert werde nach Aus-/Wiedereinschalten des zentralen Schalters unwirksam. Diagnose-Logging zeigte bei jedem Umschalten durchgehend korrekte `target.delay.sec`-Werte; der einzige fehlgeschlagene Testlauf hatte eine stummgeschaltete, alleinstehende Nicht-Bluetooth-Sink als Testgerät (kein gültiger Delay-Hörtest). Ein direkt folgender erneuter Test durch den Nutzer bestätigte korrektes Verhalten inklusive nach dem Umschalten. Logging wieder entfernt, siehe SETUP.md „Delay-Regler nach Wiedereinschalten „unwirksam"" für Details und das Logging-Muster, falls es erneut auftritt.
+
 **Damit ist kein bekannter offener Punkt aus dem ursprünglichen Anforderungskatalog mehr übrig.** Mögliche Anschlussarbeit, falls vom Nutzer gewünscht: weitere Distributionen testen (siehe Abschnitt 8, Risikotabelle), `.deb`/RPM-Packaging, oder ganz neue Funktionswünsche, die noch nicht besprochen wurden - dafür gibt es aktuell keine vorbereitete Planung, erst mit dem Nutzer klären.
 
 ---

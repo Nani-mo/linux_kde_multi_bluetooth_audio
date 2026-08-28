@@ -74,7 +74,7 @@ wpctl inspect @DEFAULT_AUDIO_SINK@               # node.name der aktuellen Stand
 
 ## Aktueller Stand
 
-- Installiertes Paket: **0.1.0-23** (`pacman -Qi plasma-multi-bt-audio` zum Prüfen).
+- Installiertes Paket: **0.1.0-25** (`pacman -Qi plasma-multi-bt-audio` zum Prüfen).
 - Anzeigename ist **„Multi-Audio-Output"** (Plasmoid-ID `com.nanimo.multibtaudio`, Paketname `plasma-multi-bt-audio` und GitLab-Projektname bewusst unverändert).
 - Reale Bluetooth-Testgeräte sind gekoppelt (können wechseln, zuletzt gesehen: JBL Flip 6, JBL Go 3, Soundcore Liberty 4 Pro).
 - **Phase 7.1 und Phase 7.2 (siehe PLAN.md) sind vollständig abgeschlossen.** Alles Folgende ist mit echter Hardware verifiziert und vom Nutzer bestätigt:
@@ -89,6 +89,7 @@ wpctl inspect @DEFAULT_AUDIO_SINK@               # node.name der aktuellen Stand
   - KDE-Sound-Menü zeigt nach Ausschalten wieder korrekt ein Gerät als ausgewählt an (siehe SETUP.md „KDE-Sound-Menü verbuggt").
 - **Bekannte, akzeptierte Einschränkung (kein zu behebender Bug):** Spotify pausiert beim vollständigen Ausschalten des zentralen Schalters (Browser/YouTube nicht) - vermutlich Spotify-eigene Sicherheitslogik.
 - **Nicht reproduzierbarer Einzelfall:** Einmalig fiel nach einem Aus-/Wiedereinschalten ein Gerät aus der Kombi-Ausgabe - zwei gezielte Nachtests zeigten es danach immer korrekt. Falls es wiederkehrt: Diagnose-Logging-Muster in SETUP.md „Re-Enable-Bug".
+- **Ebenfalls nicht reproduzierbar:** Meldung, ein eingestellter Delay-Wert werde nach Aus-/Wiedereinschalten unwirksam. Diagnose-Logging zeigte durchgehend korrekte Werte; der fehlgeschlagene Testlauf hatte eine stummgeschaltete, alleinstehende Sink als Testgerät. Erneuter Test durch den Nutzer bestätigte korrektes Verhalten. Details: SETUP.md „Delay-Regler nach Wiedereinschalten „unwirksam"".
 - **Bekannte Testeinschränkung:** `ctest`s `fullCycleLeavesNoStaleDefaultSink` kollidiert mit dem echten Plasmoid, falls dessen Kombi-Ausgabe *währenddessen* ebenfalls aktiv ist (beide nutzen den Sink-Namen `multibtaudio_combine`) - vor Testläufen `wpctl status | grep multibtaudio_combine` prüfen, siehe SETUP.md.
 - Config-Datei zur Laufzeit: `~/.config/plasma-multi-bt-audiorc`.
 
